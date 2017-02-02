@@ -1,66 +1,27 @@
 use std::io::stdin;
 use std::io::BufRead;
 
-// Expr ::= Mul  ( ( '+' | '-' ) Mul  )*
-// Mul  ::= Fact ( ( '*' | '/' ) Fact )*
-// Fact ::= 数値
-
-// Fact ::= 数値
-fn fact(tokens: &Vec<&str>, index: &mut usize) -> isize {
-    tokens[*index].parse::<isize>().unwrap()
+enum TokenType {
+    INTEGER,
+    PLUS,
+    EOF,
 }
 
-// Mul  ::= Fact ( ( '*' | '/' ) Fact )*
-fn mul(tokens: &Vec<&str>, index: &mut usize) -> isize {
-    let mut v1 = fact(tokens, index);
-
-    while tokens.len() > (*index+1) && (tokens[*index+1] == "*" || tokens[*index+1] == "/") {
-        *index += 1;
-        let op = tokens[*index];
-        *index += 1;
-        let v2 = fact(tokens, index);
-
-        if op == "*" {
-            v1 = v1 * v2;
-        } else {
-            v1 = v1 / v2;
-        }
-    }
-    return v1;
-}
-
-// Expr ::= Mul  ( ( '+' | '-' ) Mul  )*
-fn expr(tokens: &Vec<&str>, index: &mut usize) -> isize {
-    let mut v1 = mul(tokens, index);
-    while tokens.len() > (*index+1) && (tokens[*index+1] == "+" || tokens[*index+1] == "-") {
-        *index += 1;
-        let op = tokens[*index];
-        *index += 1;
-        let v2 = mul(tokens, index);
-
-        if op == "+" {
-            v1 = v1 + v2;
-        } else {
-            v1 = v1 - v2;
-        }
-    }
-    return v1;
+struct Token {
+    type: TokenType,
+    value: char
 }
 
 #[derive(Debug)]
-struct Tokens<'a> {
-    value: Vec<&'a str>
+struct Interpreter<'a> {
+    text: &'a str
 }
 
-fn lexer(input: &str) -> Vec<&str> {
-    let words: Vec<&str> = input.split_whitespace().collect();
+impl<'a> Interpreter<'a> {
 
-    // for word in words {
-    //     if word == "("
-    // }
-
-
-    return words;
+    fn get_next_token(&self) -> char {
+        self.text.chars().next().unwrap()
+    }
 }
 
 fn tokenize(input: &str) -> &str {
@@ -114,11 +75,12 @@ fn main() {
     // let input = "( 10 + 20 ) * 3";
     // let ret = lexer(input);
     // println!("{:?}", ret);
-    let stdin = stdin();
-    for line in stdin.lock().lines() {
-        let line = line.unwrap();
-        // println!("{}", line);
-        let ret = lexer(&line);
-        println!("{:?}", ret);
-    }
+    // let stdin = stdin();
+    // for line in stdin.lock().lines() {
+        // let line = line.unwrap();
+        let line = "1+2";
+        let i = Interpreter { text: &line };
+        println!("{:?}", i.get_next_token());
+        println!("{:?}", i.get_next_token());
+    // }
 }
