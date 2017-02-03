@@ -1,27 +1,67 @@
+#![allow(dead_code)]
+#![allow(unused_imports)]
+
 use std::io::stdin;
 use std::io::BufRead;
 
+use TokenType::INTEGER;
+use TokenType::PLUS;
+use TokenType::EOF;
+
+#[derive(Debug, Clone)]
 enum TokenType {
     INTEGER,
     PLUS,
     EOF,
 }
 
+#[derive(Debug, Clone)]
 struct Token {
-    type: TokenType,
-    value: char
+    typ: TokenType,
+    value: Option<char>
 }
 
 #[derive(Debug)]
 struct Interpreter<'a> {
-    text: &'a str
+    text: &'a str,
+    pos: usize
 }
 
 impl<'a> Interpreter<'a> {
 
-    fn get_next_token(&self) -> char {
-        self.text.chars().next().unwrap()
+    fn new(line: &'a str) -> Interpreter<'a> {
+        Interpreter { text: &line, pos: 0 }
     }
+
+    fn get_next_token(&mut self) -> Token {
+
+        if self.pos > (self.text.len() - 1) {
+            return Token { typ: EOF, value: None };
+        } else {
+            let chars: Vec<char> = self.text.chars().collect();
+            let current_char = chars[self.pos];
+
+            if current_char.is_digit(10) {
+                self.pos += 1;
+                return Token { typ: INTEGER, value: Some(current_char) };
+            }
+
+            if current_char == '+' {
+                self.pos += 1;
+                return Token { typ: PLUS, value: Some(current_char) };
+            }
+        }
+
+        panic!("Error parsing input!");
+    }
+
+    fn expr(&mut self) -> u32 {
+        let left = self.get_next_token().value.unwrap().to_digit(10).unwrap();
+        let op = self.get_next_token();
+        let right = self.get_next_token().value.unwrap().to_digit(10).unwrap();
+        return left + right;
+    }
+
 }
 
 fn tokenize(input: &str) -> &str {
@@ -78,9 +118,12 @@ fn main() {
     // let stdin = stdin();
     // for line in stdin.lock().lines() {
         // let line = line.unwrap();
-        let line = "1+2";
-        let i = Interpreter { text: &line };
-        println!("{:?}", i.get_next_token());
-        println!("{:?}", i.get_next_token());
+        let line = "3+2";
+        let mut i = Interpreter::new(&line);
+        println!("{:?}", i.expr());
+        // println!("{:?}", i.get_next_token());
+        // println!("{:?}", i.get_next_token());
+        // println!("{:?}", i.get_next_token());
+
     // }
 }
